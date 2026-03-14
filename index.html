@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telemetry Insight</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gray: {
+                            750: '#2d3748',
+                            850: '#1a202c',
+                            950: '#0a0d14',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <link rel="stylesheet" href="src/css/styles.css">
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen font-sans flex overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-900 border-r border-gray-800 flex flex-col shrink-0">
+        <div class="p-6">
+            <div class="flex items-center space-x-3 mb-8">
+                <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-900/20">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <span class="text-xl font-bold tracking-tight">Telemetry<span class="text-blue-500">X</span></span>
+            </div>
+
+            <nav class="space-y-1">
+                <button data-view-btn="dashboard" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition text-gray-400 hover:bg-gray-800 hover:text-gray-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    <span class="font-medium">Dashboard</span>
+                </button>
+                <button data-view-btn="plotter" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition text-gray-400 hover:bg-gray-800 hover:text-gray-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                    <span class="font-medium">Plotter</span>
+                </button>
+                <button data-view-btn="sessions" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition text-gray-400 hover:bg-gray-800 hover:text-gray-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg>
+                    <span class="font-medium">Sessions</span>
+                </button>
+            </nav>
+        </div>
+
+        <div class="mt-auto p-6">
+            <button id="sidebar-new-btn" class="w-full flex items-center justify-center space-x-2 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 font-bold py-3 rounded-xl border border-blue-500/20 transition mb-6 group">
+                <svg class="w-4 h-4 group-hover:rotate-90 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
+                <span>New Session</span>
+            </button>
+            
+            <div class="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
+                <p class="text-xs text-gray-500 mb-2 uppercase font-bold tracking-widest">System Status</p>
+                <div class="flex items-center space-x-2">
+                    <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <span class="text-sm text-gray-300">Analyzer Online</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto custom-scrollbar bg-gray-950 p-8">
+        
+        <!-- View: Dashboard -->
+        <section data-view-content="dashboard" class="hidden animate-in">
+            <header class="mb-8">
+                <h2 class="text-3xl font-bold text-white mb-2">System Dashboard</h2>
+                <p class="text-gray-400">Real-time snapshots of your latest telemetry transmission.</p>
+            </header>
+            <div id="dashboard-container">
+                <!-- Data cards here -->
+            </div>
+        </section>
+
+        <!-- View: Plotter -->
+        <section data-view-content="plotter" class="animate-in">
+            <header class="mb-8 flex justify-between items-end">
+                <div>
+                    <h2 class="text-3xl font-bold text-white mb-2">Data Plotter</h2>
+                    <p class="text-gray-400">Input raw telemetry and visualize complex relationships.</p>
+                </div>
+                <div class="flex space-x-3">
+                    <label for="file-upload" class="cursor-pointer text-gray-400 hover:text-white font-semibold py-2.5 px-4 rounded-xl border border-gray-700 hover:bg-gray-800 transition flex items-center space-x-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        <span>Open File</span>
+                        <input type="file" id="file-upload" class="hidden" accept=".csv,.json,.txt">
+                    </label>
+                    <button id="export-btn" class="text-gray-400 hover:text-white font-semibold py-2.5 px-4 rounded-xl border border-gray-700 hover:bg-gray-800 transition">
+                        Export CSV
+                    </button>
+                    <button id="plot-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-8 rounded-xl shadow-lg shadow-blue-900/20 transition active:scale-95">
+                        Generate Plots
+                    </button>
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 gap-6">
+                <div id="drop-zone" class="glass rounded-2xl p-6 overflow-hidden transition-all duration-300 border-dashed border-2 border-transparent">
+                    <div class="flex items-center justify-between mb-4">
+                        <label for="data-input" class="text-sm font-semibold text-gray-400 uppercase tracking-wider">Raw Input Stream</label>
+                        <span class="text-xs text-gray-500 font-mono">Format Support: Custom, CSV, JSON</span>
+                    </div>
+                    <textarea id="data-input" rows="8" class="w-full bg-gray-950/50 text-blue-100 border border-gray-700 rounded-xl p-4 focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none font-mono text-sm custom-scrollbar" placeholder="Paste your data here, or drag and drop a file..."></textarea>
+                </div>
+
+                <div id="plots-container" class="space-y-8 pt-4">
+                    <!-- Dynamic charts here -->
+                    <div class="text-center py-20 border-2 border-dashed border-gray-800 rounded-2xl">
+                        <p class="text-gray-500">No data plotted yet. Paste telemetry above or upload a file to start.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- View: Sessions -->
+        <section data-view-content="sessions" class="hidden animate-in">
+            <header class="mb-8 flex justify-between items-center">
+                <div>
+                    <h2 class="text-3xl font-bold text-white mb-2">Stored Sessions</h2>
+                    <p class="text-gray-400">Previously analyzed data chunks stored locally in your browser.</p>
+                </div>
+                <button id="clear-history-btn" class="text-red-400 hover:text-red-300 text-sm font-medium px-4 py-2 rounded-lg border border-red-400/20 hover:bg-red-400/10 transition">
+                    Clear All
+                </button>
+            </header>
+            <div id="history-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- History items here -->
+            </div>
+        </section>
+
+    </main>
+
+
+    <!-- App Entry -->
+    <script type="module" src="src/js/app.js"></script>
+</body>
+</html>
